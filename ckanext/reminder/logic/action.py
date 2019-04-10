@@ -182,17 +182,15 @@ def send_expiry_notifications():
         for days in expireInDays:
             if (valid_till - datetime.timedelta(days=days)) == today:
                 # add to group of notifications to send
-                print 'add to group "%s days"' % days
                 add_to_grouped(maintainer, maintainer_email, package_id, days, valid_till, package_title)
 
     # Create email to each maintainer and send them
     for maintainer_name, maintainer_details in grouped_by_maintainer.iteritems():
         subject = expire_email_template.subject
         body = expire_email_template.message(maintainer_details["expiring"])
-        print body
         mail_recipient(maintainer_name, maintainer_details["email"], subject, body)
 
-    print grouped_by_maintainer
+    log.info("Expiration notification emails sent")
 
 
 def subscribe_to_package(context, data_dict):
