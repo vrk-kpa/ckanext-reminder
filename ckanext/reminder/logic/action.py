@@ -7,7 +7,7 @@ from ckan.lib.mailer import MailerException
 import ckan.logic as logic
 import datetime
 import logging
-import email_templates.expire_email_template as expire_email_template
+from ..email_templates import expire_email_template
 
 log = logging.getLogger(__name__)
 
@@ -158,31 +158,38 @@ def send_expiry_notifications():
     grouped_by_maintainer = {}
 
     # function to group package_id:s to maintainers
-    def add_to_grouped(maintainer, maintainer_email, package_id, expires):
+    def add_to_grouped(maintainer, maintainer_email, package_id, expires, valid_till, package_title):
+        datasetItem = {
+            "package_id": package_id,
+            "package_title": package_title,
+            "valid_till": valid_till,
+        }
         if maintainer not in grouped_by_maintainer:
-            grouped_by_maintainer[maintainer] = {"email": maintainer_email, "expiring": {expires: [package_id]}}
+            grouped_by_maintainer[maintainer] = {"email": maintainer_email, "expiring": {expires: [datasetItem]}}
         elif expires not in grouped_by_maintainer[maintainer]["expiring"]:
-            grouped_by_maintainer[maintainer]["expiring"][expires] = [package_id]
+            grouped_by_maintainer[maintainer]["expiring"][expires] = [datasetItem]
         else:
-            grouped_by_maintainer[maintainer]["expiring"][expires].append(package_id)
+            grouped_by_maintainer[maintainer]["expiring"][expires].append(datasetItem)
 
     for dataset in expiring_datasets:
         valid_till = datetime.datetime.strptime(dataset[0].value, dateFormat).date()
         maintainer = dataset[1].maintainer
         maintainer_email = dataset[1].maintainer_email
         package_id = dataset[1].id
+        package_title = dataset[1].title
 
         expireInDays = [14, 5, 1]
         for days in expireInDays:
             if (valid_till - datetime.timedelta(days=days)) == today:
                 # add to group of notifications to send
                 print 'add to group "%s days"' % days
-                add_to_grouped(maintainer, maintainer_email, package_id, days)
+                add_to_grouped(maintainer, maintainer_email, package_id, days, valid_till, package_title)
 
     # Create email to each maintainer and send them
     for maintainer_name, maintainer_details in grouped_by_maintainer.iteritems():
         subject = expire_email_template.subject
         body = expire_email_template.message(maintainer_details["expiring"])
+        print body
         mail_recipient(maintainer_name, maintainer_details["email"], subject, body)
 
     print grouped_by_maintainer

@@ -6,32 +6,31 @@ from pylons import config
 
 
 def message(days):
-    messageContent = ""
+    groupedByDate = []
     separator = '\n'
-    for day in days:
+    for day, expiring in days.iteritems():
         items = []
-        for item in day:
-            # WIP!
+        for item in expiring:
             item["package_title"] = (item["package_title"].encode('ascii', 'ignore')).decode("utf-8")
             items.append(
                 singleItem.format(
                     package_id=item["package_id"],
                     package_title=item["package_title"],
-                    resource_id=item["resource_id"],
-                    broken_url=item["broken_url"],
+                    valid_till=item["valid_till"],
                     site_url=config['ckan.site_url'],
-                ).encode('utf-8')
+                )
             )
-        messageContent += separator.join(items)
-    return messageTemplate.format(content=messageContent)
+        groupedByDate.append(dayGroup.format(days=day, items=separator.join(items)))
+    return messageTemplate.format(content=separator.join(groupedByDate))
 
 
 subject = "You have datasets that are about to expire"
 
 
 messageTemplate = """
-You have datasets that are about to expire.
-You can update the "valid till" date by logging in and navigating to the expiring dataset.
+You have datasets that are about to expire. When they expire they will be marked as expired.
+If you want to you extend the validity by logging in and navigating to the expiring dataset and
+updating the "valid till" field.
 
 {content}
 ---
@@ -45,10 +44,10 @@ avoindata@vrk.fi
 
 singleItem = """
 Dataset: {package_title} ( {site_url}/data/fi/dataset/{package_id} )
-Valid till: {valid_till}
-"""
+Valid till: {valid_till}"""
 
 dayGroup = """
+---
 Expiring in {days} day(s)
 ---
 {items}
