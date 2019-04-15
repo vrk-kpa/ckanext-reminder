@@ -42,7 +42,7 @@ class ReminderCommand(p.toolkit.CkanCommand):
 
     def notify(self):
         action.send_notifications()
-    
+
     def notify_expiry(self):
         action.send_expiry_notifications()
 
