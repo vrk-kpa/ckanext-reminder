@@ -30,6 +30,8 @@ class ReminderCommand(p.toolkit.CkanCommand):
             self.send()
         elif cmd == 'notify':
             self.notify()
+        elif cmd == 'notify-expiry':
+            self.notify_expiry()
         elif cmd == 'init':
             self.init_db()
         else:
@@ -40,6 +42,9 @@ class ReminderCommand(p.toolkit.CkanCommand):
 
     def notify(self):
         action.send_notifications()
+    
+    def notify_expiry(self):
+        action.send_expiry_notifications()
 
     def init_db(self):
         import ckan.model as model

@@ -7,6 +7,7 @@ from ckan.lib.mailer import MailerException
 import ckan.logic as logic
 import datetime
 import logging
+from ..email_templates import expire_email_template
 
 log = logging.getLogger(__name__)
 
@@ -134,6 +135,62 @@ def send_notifications():
             Reminder.update_previous_reminder_sent(subscriber.subscriber_email)
 
         log.info("Notification emails sent")
+
+
+def send_expiry_notifications():
+    '''
+    Sends notification emails to site users of expiring datasets
+    The user needs to be the maintainer of the dataset to be notified
+    '''
+    import ckan.model as model
+
+    today = datetime.datetime.now().date()
+    dateFormat = "%Y-%m-%d"
+    todayString = today.strftime(dateFormat)
+    # get all datasets with expiry dates
+    expiring_datasets = (model.Session.query(model.PackageExtra, model.Package)
+                         .filter(model.PackageExtra.key == 'valid_till')
+                         .filter(model.PackageExtra.value > todayString)
+                         .filter(model.PackageExtra.state == 'active')
+                         .join(model.Package, model.PackageExtra.package_id == model.Package.id)
+                         .all())
+
+    grouped_by_maintainer = {}
+
+    # function to group package_id:s to maintainers
+    def add_to_grouped(maintainer, maintainer_email, package_id, expires, valid_till, package_title):
+        datasetItem = {
+            "package_id": package_id,
+            "package_title": package_title,
+            "valid_till": valid_till,
+        }
+        if maintainer not in grouped_by_maintainer:
+            grouped_by_maintainer[maintainer] = {"email": maintainer_email, "expiring": {expires: [datasetItem]}}
+        elif expires not in grouped_by_maintainer[maintainer]["expiring"]:
+            grouped_by_maintainer[maintainer]["expiring"][expires] = [datasetItem]
+        else:
+            grouped_by_maintainer[maintainer]["expiring"][expires].append(datasetItem)
+
+    for dataset in expiring_datasets:
+        valid_till = datetime.datetime.strptime(dataset[0].value, dateFormat).date()
+        maintainer = dataset[1].maintainer
+        maintainer_email = dataset[1].maintainer_email
+        package_id = dataset[1].id
+        package_title = dataset[1].title
+
+        expireInDays = [14, 5, 1]
+        for days in expireInDays:
+            if (valid_till - datetime.timedelta(days=days)) == today:
+                # add to group of notifications to send
+                add_to_grouped(maintainer, maintainer_email, package_id, days, valid_till, package_title)
+
+    # Create email to each maintainer and send them
+    for maintainer_name, maintainer_details in grouped_by_maintainer.iteritems():
+        subject = expire_email_template.subject
+        body = expire_email_template.message(maintainer_details["expiring"])
+        mail_recipient(maintainer_name, maintainer_details["email"], subject, body)
+
+    log.info("Expiration notification emails sent")
 
 
 def subscribe_to_package(context, data_dict):
