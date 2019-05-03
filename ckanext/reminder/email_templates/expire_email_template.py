@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from pylons import config
 
 """
@@ -11,7 +13,6 @@ def message(days):
     for day, expiring in days.iteritems():
         items = []
         for item in expiring:
-            item["package_title"] = (item["package_title"].encode('ascii', 'ignore')).decode("utf-8")
             items.append(
                 singleItem.format(
                     package_id=item["package_id"],
@@ -24,29 +25,47 @@ def message(days):
     return messageTemplate.format(content=separator.join(groupedByDate))
 
 
-subject = "You have datasets that are about to expire"
+subject = u"Tietoaineistojesi viimeinen voimassaolopäivä avoindata.fi-palvelussa lähestyy - You have datasets that are about to expire in Avoindata.fi" # noqa
 
 
-messageTemplate = """
-You have datasets that are about to expire. When they expire they will be marked as expired.
-If you want to you extend the validity by logging in and navigating to the expiring dataset and
-updating the "valid till" field.
+# TODO: update to use signature template
+messageTemplate = u"""
+Hei,
+ 
+Ylläpidät tietoaineistoja Avoindata.fi-palvelussa ja olet merkinnyt niille viimeisen voimassaolopäivän.
+ 
+Alla listatut tietoaineistosi merkitään vanhentuneiksi viimeisen voimassaolopäivän jälkeen. Voit muuttaa tietoaineistojen voimassaoloa
+kirjautumalla palveluun, valitsemalla datasetin jonka voimassaolo on umpeutumassa, ja päivittämällä arvon kentässä "Voimassa päättyen".
+Lähetämme tämän ilmoituksen kun tietoaineistosi umpeutumiseen on 1 viikko, 5 vuorokautta, ja kun aineistosi umpeutuu 24h kuluttua. 
+Jos sinulla on kysyttävää, opastamme sinua tarpeen vaatiessa osoitteessa avoindata@vrk.fi.
+ 
+Ystävällisin terveisin,
+Avoindata.fi tuki
+ 
+--
+
+Hello,
+ 
+You have uploaded a dataset or datasets in Avoindata.fi and set an expiration date for the data.
+ 
+When your datasets expire, they will be marked as expired. If you want to you extend the validity of your dataset(s), log in the service,
+navigate to the expiring dataset, and update the date in the "Valid till" field.
+You receive this notification one (1) week, five (5) days and 24 hours before your data set(s) expire
+ 
+Should you have any questions or need help, please get in touch with us at avoindata@vrk.fi.
+ 
+Best regards,
+Avoindata.fi support
 
 {content}
----
-
-Best regards
-
-Avoindata.fi support
-avoindata@vrk.fi
-"""
+---""" # noqa
 
 
-singleItem = """
-Dataset: {package_title} ( {site_url}/data/fi/dataset/{package_id} )
-Valid till: {valid_till}"""
+singleItem = u"""
+Tietoaineisto - Dataset: {package_title} ( {site_url}/data/fi/dataset/{package_id} )
+Voimassa päättyen - Valid till: {valid_till}"""
 
-dayGroup = """
+dayGroup = u"""
 ---
 Expiring in {days} day(s)
 ---
