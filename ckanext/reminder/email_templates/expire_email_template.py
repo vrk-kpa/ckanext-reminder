@@ -37,7 +37,7 @@ Ylläpidät tietoaineistoja Avoindata.fi-palvelussa ja olet merkinnyt niille vii
 Alla listatut tietoaineistosi merkitään vanhentuneiksi viimeisen voimassaolopäivän jälkeen. Voit muuttaa tietoaineistojen voimassaoloa
 kirjautumalla palveluun, valitsemalla datasetin jonka voimassaolo on umpeutumassa, ja päivittämällä arvon kentässä "Voimassa päättyen".
 Lähetämme tämän ilmoituksen kun tietoaineistosi umpeutumiseen on 1 viikko, 5 vuorokautta, ja kun aineistosi umpeutuu 24h kuluttua. 
-Jos sinulla on kysyttävää, opastamme sinua tarpeen vaatiessa osoitteessa avoindata@vrk.fi.
+Jos sinulla on kysyttävää, opastamme sinua tarpeen vaatiessa osoitteessa avoindata@dvv.fi.
  
 Ystävällisin terveisin,
 Avoindata.fi tuki
@@ -52,7 +52,7 @@ When your datasets expire, they will be marked as expired. If you want to you ex
 navigate to the expiring dataset, and update the date in the "Valid till" field.
 You receive this notification one (1) week, five (5) days and 24 hours before your data set(s) expire
  
-Should you have any questions or need help, please get in touch with us at avoindata@vrk.fi.
+Should you have any questions or need help, please get in touch with us at avoindata@dvv.fi.
  
 Best regards,
 Avoindata.fi support
