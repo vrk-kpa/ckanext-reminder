@@ -23,7 +23,7 @@ class ReminderController(p.toolkit.BaseController):
             c.package_subscription_successful = True
             h.redirect_to(controller='package', action='read', id=package_id)
             return p.toolkit.render('package/read_base.html')
-        except logic.ValidationError, error:
+        except (logic.ValidationError, KeyError) as error:
             abort(400, _('Invalid request: {error_message}').format(error_message=str(error)))
 
     def unsubscribe_index(self, subscriber_email, unsubscribe_token):
