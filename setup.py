@@ -78,9 +78,6 @@ setup(
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
-        [paste.paster_command]
-        reminder=ckanext.reminder.commands:ReminderCommand
-
         [ckan.plugins]
         reminder=ckanext.reminder.plugin:ReminderPlugin
 

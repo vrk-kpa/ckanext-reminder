@@ -1,8 +1,10 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 from ckanext.reminder.logic import action
+from ckanext.reminder import cli
 from ckan.lib.plugins import DefaultTranslation
 from pylons import config
+import six
 import logging
 
 log = logging.getLogger(__name__)
@@ -14,6 +16,7 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.IRoutes, inherit=True)
+    plugins.implements(plugins.IClick)
     if toolkit.check_ckan_version(min_version='2.5.0'):
         plugins.implements(plugins.ITranslation, inherit=True)
 
@@ -29,7 +32,7 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
         ignore_missing = toolkit.get_validator('ignore_missing')
 
         schema.update({
-            'ckanext.reminder.email': [ignore_missing, unicode],
+            'ckanext.reminder.email': [ignore_missing, six.text_type],
         })
 
         return schema
@@ -98,3 +101,8 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
         if (keep_deletable_attributes_in_api is False and context.get('for_edit') is not True) and data_dict.get('reminder'):
             data_dict.pop('reminder')
         return data_dict
+
+    # IClick
+
+    def get_commands(self):
+        return cli.get_commands()
