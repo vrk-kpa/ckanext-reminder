@@ -3,7 +3,6 @@ import ckan.plugins.toolkit as toolkit
 from ckanext.reminder.logic import action
 from ckanext.reminder import cli
 from ckan.lib.plugins import DefaultTranslation
-from pylons import config
 import six
 import logging
 
@@ -95,7 +94,7 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
     # keep_deletable_attributes_in_api to context
     def after_show(self, context, data_dict):
 
-        keep_deletable_attributes_in_api = config.get('ckanext.sixodp.keep_deletable_attributes_in_api',
+        keep_deletable_attributes_in_api = toolkit.config.get('ckanext.sixodp.keep_deletable_attributes_in_api',
                                                       context.get('keep_deletable_attributes_in_api', False))
         # Remove reminder date from api
         if (keep_deletable_attributes_in_api is False and context.get('for_edit') is not True) and data_dict.get('reminder'):

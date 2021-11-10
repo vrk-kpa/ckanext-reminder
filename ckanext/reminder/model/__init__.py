@@ -18,7 +18,7 @@ package_association_table = None
 
 
 def make_uuid():
-    return unicode(uuid.uuid4())
+    return str(uuid.uuid4())
 
 
 class Reminder(Base):
@@ -78,7 +78,7 @@ class Reminder(Base):
                 model.repo.commit()
                 log.info('Subscription added for email ' + subscriber_email)
                 return subscriber.as_dict()
-            except ValidationError, ex:
+            except ValidationError as ex:
                 log.error(ex)
 
         return subscriber.as_dict()

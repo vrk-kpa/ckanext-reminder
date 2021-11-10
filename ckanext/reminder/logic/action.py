@@ -1,9 +1,9 @@
 from ckan.common import request, _
-from pylons import config
 from ckan.lib.mailer import mail_recipient
 from ckanext.reminder.model import Reminder, ReminderSubscriptionPackageAssociation
 from ckan.logic import ValidationError
 from ckan.lib.mailer import MailerException
+from ckan.plugins import toolkit
 import ckan.logic as logic
 import datetime
 import logging
@@ -24,7 +24,7 @@ def get_datasets_with_reminders():
     '''
     now = datetime.datetime.now()
     search_dict = {
-        'fq': config.get('ckanext.reminder.date_field') + ":" + now.strftime("%Y-%m-%d")
+        'fq': toolkit.config.get('ckanext.reminder.date_field') + ":" + now.strftime("%Y-%m-%d")
     }
 
     return logic.get_action('package_search')({}, search_dict)
@@ -38,9 +38,9 @@ def send_reminders():
     items = get_datasets_with_reminders()
 
     try:
-        recipient_email_default = config.get('ckanext.reminder.email')
-        email_field_name = config.get('ckanext.reminder.email_field')
-        recipient_name_field = config.get('ckanext.reminder.recipient_name')
+        recipient_email_default = toolkit.config.get('ckanext.reminder.email')
+        email_field_name = toolkit.config.get('ckanext.reminder.email_field')
+        recipient_name_field = toolkit.config.get('ckanext.reminder.recipient_name')
         if (items['results']):
             log.debug('Number of datasets with reminders found: ' + str(len(items['results'])))
         else:
@@ -56,19 +56,19 @@ def send_reminders():
                 recipient_name = item[recipient_name_field]
             else:
                 recipient_name = ""
-            message_body = _('This is a reminder of a dataset expiration') + ': ' + config.get(
+            message_body = _('This is a reminder of a dataset expiration') + ': ' + toolkit.config.get(
                 'ckanext.reminder.site_url') + '/dataset/' + item['name']
 
             try:
 
                 mail_recipient(recipient_name, recipient_email, _('CKAN reminder'), message_body)
-            except MailerException, ex:
+            except MailerException as ex:
                 log.error("There was an error with sending email to the following address: " + recipient_email)
                 log.exception(ex)
         log.debug("Reminder emails processed")
 
     # Some other error than MailerException happened
-    except Exception, ex:
+    except Exception as ex:
         log.exception(ex)
         raise
 
@@ -123,12 +123,12 @@ def send_notifications():
         updated_packages = get_updated_packages_for_user(subscriber.id, subscriber.as_dict()['previous_reminder_sent'])
         stringified_updated_packages_list = ''
         for package in updated_packages:
-            stringified_updated_packages_list += config.get('ckanext.reminder.site_url') + '/dataset/' + package.get(
+            stringified_updated_packages_list += toolkit.config.get('ckanext.reminder.site_url') + '/dataset/' + package.get(
                 'name') + '\n'
 
         if len(updated_packages) > 0:
             message_body = _('The following datasets have been updated') + ':\n' + stringified_updated_packages_list + \
-                           '\nUnsubscribe from this newsletter: ' + config.get('ckanext.reminder.site_url') + '/reminder/' + \
+                           '\nUnsubscribe from this newsletter: ' + toolkit.config.get('ckanext.reminder.site_url') + '/reminder/' + \
                            subscriber.subscriber_email + '/unsubscribe/' + subscriber.unsubscribe_token
 
             mail_recipient("", subscriber.subscriber_email, _('Dataset has been updated'), message_body)
@@ -185,7 +185,7 @@ def send_expiry_notifications():
                 add_to_grouped(maintainer, maintainer_email, package_id, days, valid_till, package_title)
 
     # Create email to each maintainer and send them
-    for maintainer_name, maintainer_details in grouped_by_maintainer.iteritems():
+    for maintainer_name, maintainer_details in grouped_by_maintainer.items():
         subject = expire_email_template.subject
         body = expire_email_template.message(maintainer_details["expiring"])
         mail_recipient(maintainer_name, maintainer_details["email"], subject, body)
