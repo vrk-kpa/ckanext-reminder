@@ -1,16 +1,16 @@
 # coding: utf-8
 
-from pylons import config
-
 """
     A template file for datasets that are about to expire.
 """
+
+from ckan.plugins import toolkit
 
 
 def message(days):
     groupedByDate = []
     separator = '\n'
-    for day, expiring in days.iteritems():
+    for day, expiring in days.items():
         items = []
         for item in expiring:
             items.append(
@@ -18,18 +18,18 @@ def message(days):
                     package_id=item["package_id"],
                     package_title=item["package_title"],
                     valid_till=item["valid_till"],
-                    site_url=config['ckan.site_url'],
+                    site_url=toolkit.config['ckan.site_url'],
                 )
             )
         groupedByDate.append(dayGroup.format(days=day, items=separator.join(items)))
     return messageTemplate.format(content=separator.join(groupedByDate))
 
 
-subject = u"Tietoaineistojesi viimeinen voimassaolopäivä avoindata.fi-palvelussa lähestyy - You have datasets that are about to expire in Avoindata.fi" # noqa
+subject = "Tietoaineistojesi viimeinen voimassaolopäivä avoindata.fi-palvelussa lähestyy - You have datasets that are about to expire in Avoindata.fi" # noqa
 
 
 # TODO: update to use signature template
-messageTemplate = u"""
+messageTemplate = """
 Hei,
  
 Ylläpidät tietoaineistoja Avoindata.fi-palvelussa ja olet merkinnyt niille viimeisen voimassaolopäivän.
@@ -61,11 +61,11 @@ Avoindata.fi support
 ---""" # noqa
 
 
-singleItem = u"""
+singleItem = """
 Tietoaineisto - Dataset: {package_title} ( {site_url}/data/fi/dataset/{package_id} )
 Voimassa päättyen - Valid till: {valid_till}"""
 
-dayGroup = u"""
+dayGroup = """
 ---
 Expiring in {days} day(s)
 ---
