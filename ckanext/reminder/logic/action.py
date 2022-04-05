@@ -101,12 +101,16 @@ def get_updated_packages_for_user(subscriber_id, previous_reminder_sent):
 
     updated_packages = []
     for subscription in subscriptions:
-        updated_package = logic.get_action('package_show')({}, {'name_or_id': subscription.package_id})
+        try:
+            updated_package = logic.get_action('package_show')({}, {'name_or_id': subscription.package_id})
 
-        if updated_package:
-            # Notify user of an updated package if not already notified
-            if updated_package['metadata_modified'] > previous_reminder_sent:
-                updated_packages.append(updated_package)
+            if updated_package:
+                # Notify user of an updated package if not already notified
+                if updated_package['metadata_modified'] > previous_reminder_sent:
+                    updated_packages.append(updated_package)
+        except toolkit.NotAuthorized:
+            # Skip notifications for packages the user is not authorized to view
+            pass
 
     return updated_packages
 
