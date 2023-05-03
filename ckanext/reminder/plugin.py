@@ -91,7 +91,7 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
 
     # This function requires overriding resource_create and resource_update by adding
     # keep_deletable_attributes_in_api to context
-    def after_show(self, context, data_dict):
+    def after_dataset_show(self, context, data_dict):
 
         keep_deletable_attributes_in_api = toolkit.config.get('ckanext.sixodp.keep_deletable_attributes_in_api',
                                                               context.get('keep_deletable_attributes_in_api', False))
