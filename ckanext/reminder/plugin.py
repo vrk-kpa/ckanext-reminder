@@ -89,6 +89,10 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
 
     # IPackageController
 
+    def after_show(self, context, data_dict):
+        '''CKAN <2.10 compatibility'''
+        return self.after_dataset_show(context, data_dict)
+
     # This function requires overriding resource_create and resource_update by adding
     # keep_deletable_attributes_in_api to context
     def after_dataset_show(self, context, data_dict):
