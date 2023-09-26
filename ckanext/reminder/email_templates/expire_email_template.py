@@ -25,14 +25,14 @@ def message(days):
     return messageTemplate.format(content=separator.join(groupedByDate))
 
 
-subject = "Tietoaineistojesi viimeinen voimassaolopäivä avoindata.fi-palvelussa lähestyy - You have datasets that are about to expire in Avoindata.fi" # noqa
+subject = "Tietoaineistojesi viimeinen voimassaolopäivä Suomi.fi-avoindatassa lähestyy - You have datasets that are about to expire in Suomi.fi Open Data" # noqa
 
 
 # TODO: update to use signature template
 messageTemplate = """
 Hei,
  
-Ylläpidät tietoaineistoja Avoindata.fi-palvelussa ja olet merkinnyt niille viimeisen voimassaolopäivän.
+Ylläpidät tietoaineistoja Suomi.fi-avoindatassa ja olet merkinnyt niille viimeisen voimassaolopäivän.
  
 Alla listatut tietoaineistosi merkitään vanhentuneiksi viimeisen voimassaolopäivän jälkeen. Voit muuttaa tietoaineistojen voimassaoloa
 kirjautumalla palveluun, valitsemalla datasetin jonka voimassaolo on umpeutumassa, ja päivittämällä arvon kentässä "Voimassa päättyen".
@@ -40,13 +40,13 @@ Lähetämme tämän ilmoituksen kun tietoaineistosi umpeutumiseen on 1 viikko, 5
 Jos sinulla on kysyttävää, opastamme sinua tarpeen vaatiessa osoitteessa avoindata@dvv.fi.
  
 Ystävällisin terveisin,
-Avoindata.fi tuki
+Suomi.fi-avoindatan tuki
  
 --
 
 Hello,
  
-You have uploaded a dataset or datasets in Avoindata.fi and set an expiration date for the data.
+You have uploaded a dataset or datasets in Suomi.fi Open Data and set an expiration date for the data.
  
 When your datasets expire, they will be marked as expired. If you want to you extend the validity of your dataset(s), log in the service,
 navigate to the expiring dataset, and update the date in the "Valid till" field.
@@ -55,7 +55,7 @@ You receive this notification one (1) week, five (5) days and 24 hours before yo
 Should you have any questions or need help, please get in touch with us at avoindata@dvv.fi.
  
 Best regards,
-Avoindata.fi support
+Suomi.fi Open Data support
 
 {content}
 ---""" # noqa
