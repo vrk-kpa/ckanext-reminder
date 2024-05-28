@@ -2,9 +2,11 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 from ckanext.reminder.logic import action
 from ckanext.reminder import cli
+import ckanext.reminder.controller as views
 from ckan.lib.plugins import DefaultTranslation
 import six
 import logging
+from flask import Blueprint
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +16,7 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IActions)
-    plugins.implements(plugins.IRoutes, inherit=True)
+    plugins.implements(plugins.IBlueprint)
     plugins.implements(plugins.IClick)
     if toolkit.check_ckan_version(min_version='2.5.0'):
         plugins.implements(plugins.ITranslation, inherit=True)
@@ -64,35 +66,36 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
             'unsubscribe_all': action.unsubscribe_all
         }
 
-    # IRoutes
+    # IBlueprint
 
-    def before_map(self, map):
-        map.connect('/dataset/{package_id}/subscribe',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='subscribe_to_package')
+    def get_blueprint(self):
+        bp = Blueprint('reminder', __name__)
+        bp.add_url_rule('/dataset/{package_id}/subscribe',
+                        endpoint='subscribe_to_package',
+                        view_func=views.subscribe_to_package)
+        bp.add_url_rule('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}',
+                    endpoint='unsubscribe_index',
+                    methods=['GET'])
 
-        map.connect('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='unsubscribe_index',
-                    conditions=dict(method=['GET']))
+        bp.add_url_rule('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}',
+                    endpoint='unsubscribe',
+                    methods=['POST'])
 
-        map.connect('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='unsubscribe',
-                    conditions=dict(method=['POST']))
+        bp.add_url_rule('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}/all',
+                    endpoint='unsubscribe_all',
+                    methods=['POST']),
 
-        map.connect('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}/all',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='unsubscribe_all',
-                    conditions=dict(method=['POST'])),
-
-        return map
+        return bp
 
     # IPackageController
 
+    def after_show(self, context, data_dict):
+        '''CKAN <2.10 compatibility'''
+        return self.after_dataset_show(context, data_dict)
+
     # This function requires overriding resource_create and resource_update by adding
     # keep_deletable_attributes_in_api to context
-    def after_show(self, context, data_dict):
+    def after_dataset_show(self, context, data_dict):
 
         keep_deletable_attributes_in_api = toolkit.config.get('ckanext.sixodp.keep_deletable_attributes_in_api',
                                                               context.get('keep_deletable_attributes_in_api', False))
