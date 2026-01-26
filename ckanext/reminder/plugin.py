@@ -1,37 +1,42 @@
+import logging
+
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-from ckanext.reminder.logic import action
-from ckanext.reminder import cli
 from ckan.lib.plugins import DefaultTranslation
-import six
-import logging
+from ckan.plugins.toolkit import config
+
+from ckanext.reminder import cli
+from ckanext.reminder import cli as cli
+from ckanext.reminder.logic import action
+
+from .views import get_blueprints
 
 log = logging.getLogger(__name__)
 
+unicode_safe = toolkit.get_validator('unicode_safe')
 
 class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IActions)
-    plugins.implements(plugins.IRoutes, inherit=True)
-    plugins.implements(plugins.IClick)
     if toolkit.check_ckan_version(min_version='2.5.0'):
         plugins.implements(plugins.ITranslation, inherit=True)
+    plugins.implements(plugins.IBlueprint)
+    plugins.implements(plugins.IClick)
 
     # IConfigurer
 
     def update_config(self, config_):
         toolkit.add_template_directory(config_, 'templates')
         toolkit.add_public_directory(config_, 'public')
-        toolkit.add_resource('fanstatic', 'reminder')
-        toolkit.add_resource('public/css/', 'reminder_css')
+        toolkit.add_resource('assets', 'reminder')
 
     def update_config_schema(self, schema):
         ignore_missing = toolkit.get_validator('ignore_missing')
 
         schema.update({
-            'ckanext.reminder.email': [ignore_missing, six.text_type],
+            'ckanext.reminder.email': [ignore_missing, unicode_safe],
         })
 
         return schema
@@ -64,30 +69,6 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
             'unsubscribe_all': action.unsubscribe_all
         }
 
-    # IRoutes
-
-    def before_map(self, map):
-        map.connect('/dataset/{package_id}/subscribe',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='subscribe_to_package')
-
-        map.connect('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='unsubscribe_index',
-                    conditions=dict(method=['GET']))
-
-        map.connect('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='unsubscribe',
-                    conditions=dict(method=['POST']))
-
-        map.connect('/reminder/{subscriber_email}/unsubscribe/{unsubscribe_token}/all',
-                    controller='ckanext.reminder.controller:ReminderController',
-                    action='unsubscribe_all',
-                    conditions=dict(method=['POST'])),
-
-        return map
-
     # IPackageController
 
     # This function requires overriding resource_create and resource_update by adding
@@ -101,7 +82,13 @@ class ReminderPlugin(plugins.SingletonPlugin, DefaultTranslation):
             data_dict.pop('reminder')
         return data_dict
 
-    # IClick
 
+    # IBlueprint
+
+    def get_blueprint(self):
+        return get_blueprints()
+
+
+    # IClick
     def get_commands(self):
         return cli.get_commands()
