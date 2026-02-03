@@ -3,10 +3,8 @@ import logging
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 from ckan.lib.plugins import DefaultTranslation
-from ckan.plugins.toolkit import config
 
 from ckanext.reminder import cli
-from ckanext.reminder import cli as cli
 from ckanext.reminder.logic import action
 
 from .views import get_blueprints

@@ -1,5 +1,4 @@
 from ckan.common import request, _
-from ckan.plugins.toolkit import config
 from ckan.lib.mailer import mail_recipient
 from ckanext.reminder.model import Reminder, ReminderSubscriptionPackageAssociation
 from ckan.logic import ValidationError
